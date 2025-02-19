@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:music_app/constants/app_theme.dart';
 import 'package:music_app/models/onboarding_model.dart';
+import 'package:music_app/screens/home_screen.dart';
+import 'package:music_app/services/shared_preferences_service.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -146,41 +148,44 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildNextButton(BoxConstraints constraints) {
-  final buttonSize = constraints.maxWidth * 0.15;
-  
-  return GestureDetector(
-    onTap: () {
-      debugPrint("Tıklandı - Mevcut sayfa: $_currentPage");
-      if (_currentPage < _pages.length - 1) {
-        _pageController.animateToPage(
-          _currentPage + 1,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-        );
-      } else {
-        debugPrint("Son sayfaya ulaşıldı!");
-      }
-    },
-    child: Container(
-      width: buttonSize,
-      height: buttonSize,
-      decoration: BoxDecoration(
-        color: AppTheme.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ), // BoxShadow kapanışı
-        ], // boxShadow listesi kapanışı
+    final buttonSize = constraints.maxWidth * 0.15;
+
+    return GestureDetector(
+      onTap: () {
+        debugPrint("Tıklandı - Mevcut sayfa: $_currentPage");
+        if (_currentPage < _pages.length - 1) {
+          _pageController.animateToPage(
+            _currentPage + 1,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+        } else {
+          SharedPreferencesService().setOnboardingSeen();
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
+      },
+      child: Container(
+        width: buttonSize,
+        height: buttonSize,
+        decoration: BoxDecoration(
+          color: AppTheme.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Icon(
+          Icons.arrow_forward,
+          color: AppTheme.accent,
+          size: buttonSize * 0.4,
+        ),
       ),
-      child: Icon(
-        Icons.arrow_forward,
-        color: AppTheme.accent,
-        size: buttonSize * 0.4,
-      ),
-    ),
-  );
-}
+    );
+  }
 }
