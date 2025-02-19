@@ -10,7 +10,7 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  final PageController _pageController = PageController();
+  final PageController _pageController = PageController(initialPage: 0); 
   int _currentPage = 0;
 
   final List<OnboardingModel> _pages = [
@@ -29,141 +29,158 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       description: 'Listen to your favorite podcasts.',
       imagePath: 'assets/images/onboarding3.png',
     ),
-    
   ];
 
   @override
+  void dispose() {
+    _pageController.dispose(); 
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentPage = index;
-                  });
-                },
-                itemCount: _pages.length,
-                itemBuilder: (context, index) {
-                  return _buildPage(_pages[index]);
-                },
+      backgroundColor: AppTheme.background,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final screenHeight = constraints.maxHeight;
+          
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: [
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Getting Started',
+                    style: TextStyle(
+                      color: AppTheme.textGrey,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: screenHeight * 0.04),
+                  Expanded(
+                    child: PageView.builder(
+                      controller: _pageController,
+                      physics: const ClampingScrollPhysics(),
+                      onPageChanged: (index) {
+                        setState(() => _currentPage = index);
+                      },
+                      itemCount: _pages.length,
+                      itemBuilder: (context, index) {
+                        return _buildPage(_pages[index], constraints);
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  _buildNextButton(constraints),
+                  const SizedBox(height: 32),
+                ],
               ),
             ),
-            _buildIndicator(),
-            _buildNextButton(),
-            SizedBox(height: size.height * 0.05), 
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildPage(OnboardingModel page) {
-    
-    final size = MediaQuery.of(context).size;
-    
-    
-    final imageWidth = size.width * 0.65;
-    
-    final imageHeight = imageWidth * 1.32;
-
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (page.imagePath != null) ...[
-            Container(
-              width: imageWidth,  
-              height: imageHeight, 
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(20),
-                ),
-                color: AppTheme.white,
-              ),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(20),
-                ),
-                child: Image.asset(
-                  page.imagePath!,
-                  fit: BoxFit.cover,
-                ),
+  Widget _buildPage(OnboardingModel page, BoxConstraints constraints) {
+    final textTheme = AppTheme.getResponsiveTextTheme(context);
+    return Column(
+      children: [
+        Container(
+          width: constraints.maxWidth * 0.85,
+          height: constraints.maxHeight * 0.35,
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(140),
+              bottom: Radius.circular(32),
+            ),
+            image: DecorationImage( 
+              image: AssetImage(page.imagePath!),
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        const Spacer(),
+        Column(
+          children: [
+            Text(page.title, style: textTheme.displayLarge),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                page.description,
+                style: textTheme.bodyLarge,
+                textAlign: TextAlign.center,
+                maxLines: 3,
               ),
             ),
-            SizedBox(height: size.height * 0.05),
+            const SizedBox(height: 40),
+            _buildIndicator(),
           ],
-          Text(
-            page.title,
-            style: Theme.of(context).textTheme.displayLarge,
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: size.height * 0.02), 
-          Text(
-            page.description,
-            style: Theme.of(context).textTheme.bodyLarge,
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
+        ),
+        const Spacer(),
+      ],
     );
   }
 
   Widget _buildIndicator() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(
-        _pages.length,
-        (index) => Container(
+      children: _pages.map((e) {
+        final index = _pages.indexOf(e);
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 200), 
           margin: const EdgeInsets.symmetric(horizontal: 4),
-          width: 8,
+          width: _currentPage == index ? 24 : 8,
           height: 8,
           decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: _currentPage == index 
-                ? AppTheme.accent 
-                : AppTheme.textGrey,
+            borderRadius: BorderRadius.circular(4),
+            color: _currentPage == index ? AppTheme.accent : AppTheme.textGrey,
           ),
-        ),
-      ),
+        );
+      }).toList(),
     );
   }
 
-  Widget _buildNextButton() {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: GestureDetector(
-        onTap: () {
-          if (_currentPage < _pages.length - 1) {
-            _pageController.nextPage(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeIn,
-            );
-          } else {
-            
-          }
-        },
-        child: Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            shape: BoxShape.rectangle,
-            borderRadius: BorderRadius.circular(16),
-            color: AppTheme.white,
-          ),
-          child: Icon(
-            Icons.arrow_forward,
-            color: AppTheme.accent,
-            size: 24,
-          ),
-        ),
+  Widget _buildNextButton(BoxConstraints constraints) {
+  final buttonSize = constraints.maxWidth * 0.15;
+  
+  return GestureDetector(
+    onTap: () {
+      debugPrint("Tıklandı - Mevcut sayfa: $_currentPage");
+      if (_currentPage < _pages.length - 1) {
+        _pageController.animateToPage(
+          _currentPage + 1,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      } else {
+        debugPrint("Son sayfaya ulaşıldı!");
+      }
+    },
+    child: Container(
+      width: buttonSize,
+      height: buttonSize,
+      decoration: BoxDecoration(
+        color: AppTheme.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ), // BoxShadow kapanışı
+        ], // boxShadow listesi kapanışı
       ),
-    );
-  }
-} 
+      child: Icon(
+        Icons.arrow_forward,
+        color: AppTheme.accent,
+        size: buttonSize * 0.4,
+      ),
+    ),
+  );
+}
+}
