@@ -30,13 +30,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,19 +50,12 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-              style: TextStyle(color: AppTheme.textGrey),
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.displayLarge,
-            ),
+          
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: () {},
         backgroundColor: AppTheme.accent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),

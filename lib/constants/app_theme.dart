@@ -10,26 +10,27 @@ class AppTheme {
   static const Color textLight = Colors.white;
   static const Color textGrey = Colors.white70;
 
-
-  static ThemeData darkTheme = ThemeData(
-
-    scaffoldBackgroundColor: background,
-    primaryColor: accent,
+  static TextTheme getResponsiveTextTheme(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     
-    brightness: Brightness.dark,
-    useMaterial3: true,
-
-    textTheme: const TextTheme(
+    return TextTheme(
       displayLarge: TextStyle(
-        fontSize: 40,
+        fontSize: screenWidth * 0.09, 
         fontWeight: FontWeight.bold,
         color: textLight,
       ),
       bodyLarge: TextStyle(
-        fontSize: 16,
+        fontSize: screenWidth * 0.04, 
         color: textGrey,
         height: 1.5,
       ),
-    ),
+    );
+  }
+
+  static ThemeData darkTheme = ThemeData(
+    scaffoldBackgroundColor: background,
+    primaryColor: accent,
+    brightness: Brightness.dark,
+    useMaterial3: true,
   );
 }
