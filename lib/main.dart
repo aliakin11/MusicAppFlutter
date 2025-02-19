@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:music_app/constants/app_theme.dart';
 import 'package:music_app/screens/onboarding_screen.dart';
+import 'package:music_app/screens/home_screen.dart';
+import 'package:music_app/services/shared_preferences_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +17,18 @@ class MyApp extends StatelessWidget {
       title: 'Podkes',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      home: const OnboardingScreen(),
+      home: FutureBuilder<bool>(
+        future: SharedPreferencesService().isOnboardingSeen(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.data == true) {
+            return const HomeScreen();
+          }
+          return const OnboardingScreen(); 
+        },
+      ),
     );
   }
 }
