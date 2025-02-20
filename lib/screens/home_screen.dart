@@ -12,176 +12,125 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => HomeViewModel(),
-      child: const HomeView(),
-    );
-  }
-}
-
-class HomeView extends StatelessWidget {
-  const HomeView({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    
-    final viewModel = context.watch<HomeViewModel>();
-    final size = MediaQuery.of(context).size;
-    
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              const SizedBox(height: 16),
-              _buildSearchBar(),
-              const SizedBox(height: 16),
-              _buildCategories(viewModel),
-              const SizedBox(height: 24),
-              const Text(
-                'Trending',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+    return Consumer<HomeViewModel>(
+      builder: (context, viewModel, child) {
+        return Scaffold(
+          body: SafeArea(
+            child: Column(
+              children: [
+                
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Podkes',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Stack(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.notifications_outlined),
+                            onPressed: () {},
+                          ),
+                          Positioned(
+                            right: 12,
+                            top: 12,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: _buildPodcastGrid(viewModel, size),
-              ),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: const CustomBottomNavigationBar(),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        IconButton(
-          icon: const Icon(Icons.menu),
-          onPressed: () {},
-        ),
-        const Text(
-          'Podkes',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Stack(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.notifications_outlined),
-              onPressed: () {},
-            ),
-            Positioned(
-              right: 12,
-              top: 12,
-              child: Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
+                
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: SearchBar(
+                    hintText: 'Search tracks...',
+                    leading: const Icon(Icons.search),
+                    onChanged: (query) {
+                      
+                    },
+                  ),
                 ),
-              ),
+                const SizedBox(height: 16),
+                
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: List.generate(
+                      viewModel.categories.length,
+                      (index) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: CategoryChip(
+                          label: viewModel.categories[index],
+                          isSelected: viewModel.selectedCategoryIndex == index,
+                          onTap: () => viewModel.selectCategory(index),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Trending',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                
+                if (viewModel.isLoading)
+                  const Center(child: CircularProgressIndicator())
+                else if (viewModel.error != null)
+                  Center(child: Text(viewModel.error!))
+                else if (viewModel.tracks.isEmpty)
+                  const Center(child: Text('No tracks found'))
+                else
+                  Expanded(
+                    child: GridView.builder(
+                      padding: const EdgeInsets.all(16),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.75,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                      ),
+                      itemCount: viewModel.tracks.length,
+                      itemBuilder: (context, index) {
+                        return PodcastCard(
+                          podcast: viewModel.tracks[index],
+                          onTap: () {
+                            
+                            
+                          },
+                        );
+                      },
+                    ),
+                  ),
+              ],
             ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const TextField(
-        decoration: InputDecoration(
-          hintText: 'Search',
-          border: InputBorder.none,
-          icon: Icon(Icons.search),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCategories(HomeViewModel viewModel) {
-    if (viewModel.isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (viewModel.error != null) {
-      return Center(
-        child: Text(
-          viewModel.error!,
-          style: const TextStyle(color: Colors.red),
-        ),
-      );
-    }
-
-    return SizedBox(
-      height: 48,
-      child: ShaderMask(
-        shaderCallback: (Rect bounds) {
-          return LinearGradient(
-            begin: Alignment.centerRight,
-            end: Alignment.centerLeft,
-            colors: [
-              Colors.white.withOpacity(0.0),
-              Colors.white,
-            ],
-            stops: const [0.0, 0.05],
-          ).createShader(bounds);
-        },
-        blendMode: BlendMode.dstIn,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: viewModel.categories.length,
-          padding: const EdgeInsets.only(right: 16),
-          itemBuilder: (context, index) {
-            return CategoryChip(
-              label: viewModel.categories[index],
-              isSelected: viewModel.selectedCategoryIndex == index,
-              onTap: () => viewModel.selectCategory(index),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPodcastGrid(HomeViewModel viewModel, Size size) {
-    return GridView.builder(
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: size.width > 600 ? 3 : 2,
-        childAspectRatio: 0.8,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-      ),
-      itemCount: viewModel.trendingPodcasts.length,
-      itemBuilder: (context, index) {
-        final podcast = viewModel.trendingPodcasts[index];
-        return PodcastCard(
-          podcast: podcast,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PodcastDetailsScreen(podcast: podcast),
-              ),
-            );
-          },
+          ),
+          bottomNavigationBar: const CustomBottomNavigationBar(),
         );
       },
     );

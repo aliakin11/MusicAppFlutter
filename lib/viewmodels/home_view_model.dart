@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../services/spotify_service.dart';
 
 class HomeViewModel extends ChangeNotifier {
-  final _spotifyService = SpotifyService();
+  final SpotifyService _spotifyService = SpotifyService();
+  
   
   List<String> _categories = ['All'];
   List<String> get categories => _categories;
@@ -10,51 +11,73 @@ class HomeViewModel extends ChangeNotifier {
   int _selectedCategoryIndex = 0;
   int get selectedCategoryIndex => _selectedCategoryIndex;
   
-  bool _isLoading = false;
+  
+  List<Map<String, dynamic>> _tracks = [];
+  List<Map<String, dynamic>> get tracks => _tracks;
+  
+  bool _isLoading = true;
   bool get isLoading => _isLoading;
   
   String? _error;
   String? get error => _error;
 
-   List<PodcastModel> trendingPodcasts = [
-    PodcastModel(
-      title: 'The missing 96 percent of the universe',
-      author: 'Claire Malone',
-      imageUrl: 'assets/images/onboarding1.png',
-    ),
-    PodcastModel(
-      title: 'How Dolly Parton led me to an epiphany',
-      author: 'Abumenyang',
-      imageUrl: 'assets/images/onboarding2.png',
-    ),
-    
-  ];
-
   HomeViewModel() {
-    _loadCategories();
+    _loadInitialData();
   }
 
-  Future<void> _loadCategories() async {
+  Future<void> _loadInitialData() async {
     try {
       _isLoading = true;
       notifyListeners();
 
-      final spotifyCategories = await _spotifyService.getMusicCategories();
-      _categories = ['All', ...spotifyCategories];
+     
+      await _loadCategories();
+      
+      
+      await _loadTracks();
+      
       _error = null;
     } catch (e) {
-      _error = 'Kategoriler yüklenirken bir hata oluştu';
-      print('Category error: $e');
+      _error = 'Failed to load data: $e';
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  void selectCategory(int index) {
+  Future<void> _loadCategories() async {
+    try {
+      final spotifyCategories = await _spotifyService.getMusicCategories();
+      _categories = ['All', ...spotifyCategories];
+    } catch (e) {
+      print('Category error: $e');
+      throw Exception('Failed to load categories');
+    }
+  }
+
+  Future<void> _loadTracks() async {
+    try {
+      _tracks = await _spotifyService.getAllTracks();
+    } catch (e) {
+      print('Tracks error: $e');
+      throw Exception('Failed to load tracks');
+    }
+  }
+
+  Future<void> selectCategory(int index) async {
     _selectedCategoryIndex = index;
+    _isLoading = true;
     notifyListeners();
-    // Daha sonra seçilen kategoriye göre müzikleri filtreleyebiliriz
+
+    try {
+      final category = _categories[index];
+      _tracks = await _spotifyService.getTracksByCategory(category);
+    } catch (e) {
+      _error = 'Failed to load tracks for category: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }
 

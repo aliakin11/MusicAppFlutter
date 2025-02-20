@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:music_app/constants/app_theme.dart';
 import 'package:music_app/screens/onboarding_screen.dart';
 import 'package:music_app/screens/home_screen.dart';
 import 'package:music_app/services/shared_preferences_service.dart';
 import 'package:music_app/services/spotify_service.dart';
+import 'viewmodels/home_view_model.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,21 +32,26 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Podkes',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
-      home: FutureBuilder<bool>(
-        future: SharedPreferencesService().isOnboardingSeen(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.data == true) {
-            return const HomeScreen();
-          }
-          return const OnboardingScreen(); 
-        },
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => HomeViewModel()),
+      ],
+      child: MaterialApp(
+        title: 'Podkes',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.darkTheme,
+        home: FutureBuilder<bool>(
+          future: SharedPreferencesService().isOnboardingSeen(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.data == true) {
+              return const HomeScreen();
+            }
+            return const OnboardingScreen(); 
+          },
+        ),
       ),
     );
   }

@@ -50,13 +50,14 @@ class CustomBottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
+      currentIndex: 0,
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
           label: 'Discover',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.library_books),
+          icon: Icon(Icons.library_music),
           label: 'Library',
         ),
         BottomNavigationBarItem(
@@ -64,8 +65,9 @@ class CustomBottomNavigationBar extends StatelessWidget {
           label: 'Profile',
         ),
       ],
-      currentIndex: 0,
-      selectedItemColor: Colors.blue,
+      onTap: (index) {
+        
+      },
     );
   }
 }
