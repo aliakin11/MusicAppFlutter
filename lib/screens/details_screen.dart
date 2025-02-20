@@ -66,7 +66,7 @@ class PodcastDetailsScreen extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 40), // Back button ile dengelemek için
+          const SizedBox(width: 40), 
         ],
       ),
     );
