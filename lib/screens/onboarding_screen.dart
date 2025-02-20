@@ -12,6 +12,7 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
+
   final PageController _pageController = PageController(initialPage: 0); 
   int _currentPage = 0;
 
@@ -152,6 +153,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     return GestureDetector(
       onTap: () {
+        
         debugPrint("Tıklandı - Mevcut sayfa: $_currentPage");
         if (_currentPage < _pages.length - 1) {
           _pageController.animateToPage(
