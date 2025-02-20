@@ -103,40 +103,33 @@ class HomeView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF252836).withOpacity(0.3),
-        borderRadius: BorderRadius.circular(25),
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.search,
-            color: Color(0xFFFFFFFF),
-            size: 20,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: TextField(
-              style: const TextStyle(
-                color: Color(0xFF252836),
-                fontSize: 16,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Search',
-                hintStyle: TextStyle(
-                  color: const Color(0xFF252836).withOpacity(0.5),
-                  fontSize: 16,
-                ),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-            ),
-          ),
-        ],
+      child: const TextField(
+        decoration: InputDecoration(
+          hintText: 'Search',
+          border: InputBorder.none,
+          icon: Icon(Icons.search),
+        ),
       ),
     );
   }
 
   Widget _buildCategories(HomeViewModel viewModel) {
+    if (viewModel.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (viewModel.error != null) {
+      return Center(
+        child: Text(
+          viewModel.error!,
+          style: const TextStyle(color: Colors.red),
+        ),
+      );
+    }
+
     return SizedBox(
       height: 48,
       child: ShaderMask(
@@ -194,3 +187,4 @@ class HomeView extends StatelessWidget {
     );
   }
 }
+

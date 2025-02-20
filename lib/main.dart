@@ -1,10 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:music_app/constants/app_theme.dart';
 import 'package:music_app/screens/onboarding_screen.dart';
 import 'package:music_app/screens/home_screen.dart';
 import 'package:music_app/services/shared_preferences_service.dart';
+import 'package:music_app/services/spotify_service.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  await dotenv.load(fileName: ".env");
+  
+  
+  final spotifyService = SpotifyService();
+  final isConnected = await spotifyService.authenticate();
+  
+  if (isConnected) {
+    print('Spotify API bağlantısı başarılı!');
+    print('Access Token: ${spotifyService.accessToken}');
+  } else {
+    print('Spotify API bağlantısı başarısız!');
+  }
+
   runApp(const MyApp());
 }
 
