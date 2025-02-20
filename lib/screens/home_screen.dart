@@ -4,6 +4,8 @@ import '../viewmodels/home_view_model.dart';
 import '../widgets/category_chip.dart';
 import '../widgets/podcast_card.dart';
 import '../widgets/bottom_nav_item.dart';
+import '../screens/details_screen.dart';
+import '../screens/details_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -22,6 +24,7 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     final viewModel = context.watch<HomeViewModel>();
     final size = MediaQuery.of(context).size;
     
@@ -100,15 +103,35 @@ class HomeView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(12),
+        color: const Color(0xFF252836).withOpacity(0.3),
+        borderRadius: BorderRadius.circular(25),
       ),
-      child: const TextField(
-        decoration: InputDecoration(
-          hintText: 'Search',
-          border: InputBorder.none,
-          icon: Icon(Icons.search),
-        ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.search,
+            color: Color(0xFFFFFFFF),
+            size: 20,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextField(
+              style: const TextStyle(
+                color: Color(0xFF252836),
+                fontSize: 16,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Search',
+                hintStyle: TextStyle(
+                  color: const Color(0xFF252836).withOpacity(0.5),
+                  fontSize: 16,
+                ),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -156,7 +179,17 @@ class HomeView extends StatelessWidget {
       itemCount: viewModel.trendingPodcasts.length,
       itemBuilder: (context, index) {
         final podcast = viewModel.trendingPodcasts[index];
-        return PodcastCard(podcast: podcast);
+        return PodcastCard(
+          podcast: podcast,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PodcastDetailsScreen(podcast: podcast),
+              ),
+            );
+          },
+        );
       },
     );
   }
