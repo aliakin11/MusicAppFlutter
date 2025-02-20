@@ -1,10 +1,22 @@
 import 'package:flutter/material.dart';
+import '../services/spotify_service.dart';
 
 class HomeViewModel extends ChangeNotifier {
-  List<String> categories = ['All', 'Life', 'Comedy', 'Tech'];
-  int selectedCategoryIndex = 0;
+  final _spotifyService = SpotifyService();
   
-  List<PodcastModel> trendingPodcasts = [
+  List<String> _categories = ['All'];
+  List<String> get categories => _categories;
+  
+  int _selectedCategoryIndex = 0;
+  int get selectedCategoryIndex => _selectedCategoryIndex;
+  
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+  
+  String? _error;
+  String? get error => _error;
+
+   List<PodcastModel> trendingPodcasts = [
     PodcastModel(
       title: 'The missing 96 percent of the universe',
       author: 'Claire Malone',
@@ -18,9 +30,31 @@ class HomeViewModel extends ChangeNotifier {
     
   ];
 
+  HomeViewModel() {
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      final spotifyCategories = await _spotifyService.getMusicCategories();
+      _categories = ['All', ...spotifyCategories];
+      _error = null;
+    } catch (e) {
+      _error = 'Kategoriler yüklenirken bir hata oluştu';
+      print('Category error: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   void selectCategory(int index) {
-    selectedCategoryIndex = index;
+    _selectedCategoryIndex = index;
     notifyListeners();
+    // Daha sonra seçilen kategoriye göre müzikleri filtreleyebiliriz
   }
 }
 
