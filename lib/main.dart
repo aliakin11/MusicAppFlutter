@@ -7,6 +7,8 @@ import 'package:music_app/screens/home_screen.dart';
 import 'package:music_app/services/shared_preferences_service.dart';
 import 'package:music_app/services/spotify_service.dart';
 import 'viewmodels/home_view_model.dart';
+import 'viewmodels/library_view_model.dart';
+import 'viewmodels/profile_view_model.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,10 +20,10 @@ Future<void> main() async {
   final isConnected = await spotifyService.authenticate();
   
   if (isConnected) {
-    print('Spotify API bağlantısı başarılı!');
+    print('Spotify API baglantisi basarili!');
     print('Access Token: ${spotifyService.accessToken}');
   } else {
-    print('Spotify API bağlantısı başarısız!');
+    print('Spotify API baglantisi basarisiz!');
   }
 
   runApp(const MyApp());
@@ -35,6 +37,8 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => HomeViewModel()),
+        ChangeNotifierProvider(create: (_) => LibraryViewModel()),
+        ChangeNotifierProvider(create: (_) => ProfileViewModel()),
       ],
       child: MaterialApp(
         title: 'Podkes',
