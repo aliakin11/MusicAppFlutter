@@ -85,8 +85,12 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _tracks = await _spotifyService.searchTracks(query);
-      _error = null;
+      if (query.isEmpty) {
+        await _loadTracks();
+      } else {
+        _tracks = await _spotifyService.searchTracks(query);
+        _error = null;
+      }
     } catch (e) {
       _error = 'Failed to search tracks: $e';
     } finally {
@@ -100,7 +104,6 @@ class PodcastModel {
   final String title;
   final String author;
   final String imageUrl;
-
   PodcastModel({
     required this.title,
     required this.author,

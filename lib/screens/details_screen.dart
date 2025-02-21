@@ -1,41 +1,55 @@
 import 'package:flutter/material.dart';
-import '../viewmodels/home_view_model.dart';
 import '../widgets/wave_progress_bar.dart';
 import '../constants/app_theme.dart';
+import '../services/spotify_service.dart';
+import 'package:audioplayers/audioplayers.dart';
 
-class PodcastDetailsScreen extends StatelessWidget {
-  final PodcastModel podcast;
+class DetailsScreen extends StatelessWidget {
+  final Map<String, dynamic> podcast;
+  final String trackId;
 
-  const PodcastDetailsScreen({
-    Key? key,
-    required this.podcast,
-  }) : super(key: key);
+  
+  DetailsScreen({Key? key, required this.podcast})
+      : trackId = podcast['id'] != null ? podcast['id'] as String : '', 
+        super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+
+    final String title = podcast['name'] ?? 'Unknown Track';
+    final String artist = (podcast['artists'] as List?)?.map((a) => a['name']).join(', ') ?? 'Unknown Artist';
+    final List<dynamic> images = podcast['album']['images'] ?? [];
+    final String imageUrl = images.isNotEmpty ? images[0]['url'] : '';
+
     return Theme(
       data: AppTheme.darkTheme,
       child: Scaffold(
         body: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(context),
-              Expanded(
-                child: SingleChildScrollView(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                _buildHeader(context),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      _buildPodcastImage(size),
-                      _buildPodcastInfo(),
-                      _buildProgressBar(),
-                      _buildControls(),
+                      _buildPodcastImage(imageUrl, screenWidth),
+                      SizedBox(height: screenHeight * 0.03),
+                      _buildPodcastInfo(title, artist, screenWidth),
+                      SizedBox(height: screenHeight * 0.03),
+                      _buildProgressBar(screenWidth),
+                      SizedBox(height: screenHeight * 0.03),
+                      _buildControls(screenWidth),
+                      SizedBox(height: screenHeight * 0.02),
                     ],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -48,10 +62,7 @@ class PodcastDetailsScreen extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios,
-              color: Colors.white,
-            ),
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
             onPressed: () => Navigator.pop(context),
           ),
           const Expanded(
@@ -66,120 +77,117 @@ class PodcastDetailsScreen extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 40), 
+          const SizedBox(width: 40),
         ],
       ),
     );
   }
 
-  Widget _buildPodcastImage(Size size) {
-    return Container(
-      width: size.width,
-      height: size.width * 0.8,
-      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+  Widget _buildPodcastImage(String imageUrl, double screenWidth) {
+    return AspectRatio(
+      aspectRatio: 1,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Image.asset(
-          podcast.imageUrl,
-          fit: BoxFit.cover,
+        borderRadius: BorderRadius.circular(screenWidth * 0.04),
+        child: imageUrl.isNotEmpty
+            ? Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: Colors.grey,
+                  child: const Icon(Icons.error, color: Colors.white),
+                ),
+              )
+            : Container(color: Colors.grey),
+      ),
+    );
+  }
+
+  Widget _buildPodcastInfo(String title, String artist, double screenWidth) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: screenWidth * 0.06,
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
         ),
-      ),
+        SizedBox(height: screenWidth * 0.02),
+        Text(
+          artist,
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.7),
+            fontSize: screenWidth * 0.04,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 
-  Widget _buildPodcastInfo() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            podcast.title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            podcast.author,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 16,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProgressBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Column(
-        children: [
-          WaveProgressBar(progress: 0.7),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '24:32',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
-                  fontSize: 12,
-                ),
+  Widget _buildProgressBar(double screenWidth) {
+    return Column(
+      children: [
+        SizedBox(
+          width: screenWidth * 0.8,
+          child: WaveProgressBar(progress: 0.7),
+        ),
+        SizedBox(height: screenWidth * 0.02),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '24:32',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.7),
+                fontSize: screenWidth * 0.035,
               ),
-              Text(
-                '34:00',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
-                  fontSize: 12,
-                ),
+            ),
+            Text(
+              '34:00',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.7),
+                fontSize: screenWidth * 0.035,
               ),
-            ],
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
-  Widget _buildControls() {
+  Widget _buildControls(double screenWidth) {
+    final spotifyService = SpotifyService();
+    final AudioPlayer audioPlayer = AudioPlayer();
+
     return Padding(
-      padding: const EdgeInsets.all(32.0),
+      padding: EdgeInsets.only(bottom: screenWidth * 0.08),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           IconButton(
-            icon: const Icon(
-              Icons.skip_previous,
-              color: Colors.white,
-              size: 36,
-            ),
+            icon: Icon(Icons.skip_previous, color: Colors.white, size: screenWidth * 0.09),
             onPressed: () {},
           ),
+          SizedBox(width: screenWidth * 0.1),
           Container(
-            width: 64,
-            height: 64,
+            width: screenWidth * 0.15,
+            height: screenWidth * 0.15,
             decoration: const BoxDecoration(
               color: Colors.white,
               shape: BoxShape.circle,
             ),
             child: IconButton(
-              icon: const Icon(
-                Icons.play_arrow,
-                size: 36,
-              ),
+              icon: Icon(Icons.play_arrow, size: screenWidth * 0.08),
               onPressed: () {},
             ),
           ),
+          SizedBox(width: screenWidth * 0.1),
           IconButton(
-            icon: const Icon(
-              Icons.skip_next,
-              color: Colors.white,
-              size: 36,
-            ),
+            icon: Icon(Icons.skip_next, color: Colors.white, size: screenWidth * 0.09),
             onPressed: () {},
           ),
         ],
