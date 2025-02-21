@@ -1,16 +1,23 @@
-# music_app
+## Özellikler
 
-A new Flutter project.
+- 🎵 Müzik keşfi ve arama
+- 📚 Kütüphane yönetimi (Playlist, Sanatçı, Albüm)
+- 👤 Kullanıcı profili ve istatistikler
+- 🌓 Karanlık tema desteği
+- 🎨 Modern ve kullanıcı dostu arayüz
+- 📱 Responsive tasarım
+- 🔄 State management
+- 🎯 MVVM mimarisi
 
-## Getting Started
+## Teknolojiler & Araçlar
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- **Framework:** Flutter & Dart
+- **Mimari:** MVVM (Model-View-ViewModel)
+- **State Management:** Provider
+- **API:** Spotify Web API
+- **Dependency Injection:** Provider
+- **Local Storage:** SharedPreferences
+- **HTTP Client:** http package
+- **Environment Variables:** flutter_dotenv
+- **Asset Management:** flutter_gen
+- **Image Loading:** cached_network_image
