@@ -79,6 +79,21 @@ class HomeViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> searchTracks(String query) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      _tracks = await _spotifyService.searchTracks(query);
+      _error = null;
+    } catch (e) {
+      _error = 'Failed to search tracks: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }
 
 class PodcastModel {

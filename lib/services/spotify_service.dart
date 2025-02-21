@@ -184,6 +184,24 @@ class SpotifyService {
     }
   }
 
+  Future<List<Map<String, dynamic>>> searchTracks(String query) async {
+    if (!isAuthenticated) await authenticate();
+    
+    final response = await http.get(
+      Uri.parse('https://api.spotify.com/v1/search?q=$query&type=track&market=TR&limit=20'),
+      headers: {
+        'Authorization': 'Bearer $_accessToken',
+      },
+    );
+    
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return List<Map<String, dynamic>>.from(data['tracks']['items']);
+    } else {
+      throw Exception('Failed to search tracks');
+    }
+  }
+
   
  
 
