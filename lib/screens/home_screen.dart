@@ -61,7 +61,7 @@ class HomeScreen extends StatelessWidget {
                     hintText: 'Search tracks...',
                     leading: const Icon(Icons.search),
                     onChanged: (query) {
-                      
+                      viewModel.searchTracks(query);
                     },
                   ),
                 ),
