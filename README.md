@@ -15,7 +15,6 @@
 - **Mimari:** MVVM (Model-View-ViewModel)
 - **State Management:** Provider
 - **API:** Spotify Web API
-- **Dependency Injection:** Provider
 - **Local Storage:** SharedPreferences
 - **HTTP Client:** http package
 - **Environment Variables:** flutter_dotenv
